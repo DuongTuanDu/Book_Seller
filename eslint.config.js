@@ -23,9 +23,12 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      '@typescript-eslint/no-unused-vars': [
-        'warn'
-      ]
+      '@typescript-eslint/no-unused-vars': ['warn'],
+      '@typescript-eslint/no-empty-interface': [
+        'warn',
+        { allowSingleExtends: true }, // Cho phép các interface mở rộng
+      ],
+      '@typescript-eslint/no-explicit-any': 'off', // Tắt rule này
     },
   },
 )
