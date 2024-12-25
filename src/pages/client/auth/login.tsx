@@ -3,6 +3,7 @@ import './login.scss'
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginAPI } from "@/services/api";
+import { useCurrentApp } from "@/components/context/app.context";
 
 type FieldType = {
     username?: string | undefined;
@@ -13,6 +14,7 @@ const LoginPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { message, notification } = App.useApp();
+    const { setIsAuthenticated, setUser } = useCurrentApp()
 
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
         try {
@@ -20,6 +22,8 @@ const LoginPage = () => {
             const res = await loginAPI( values.username ?? '', values.password ?? '')
             if (res.data) {
                 setIsLoading(false)
+                setIsAuthenticated(true)
+                setUser(res.data.user)
                 localStorage.setItem("access_token", res.data.access_token)
                 message.success("Đăng nhập thành công!")
                 navigate("/")
