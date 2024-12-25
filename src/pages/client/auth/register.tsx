@@ -20,7 +20,6 @@ const RegisterPage = () => {
         try {
             setIsLoading(true)
             const res = await registerAPI(values.fullName ?? '', values.email ?? '', values.password ?? '', values.phone ?? '')
-            console.log("res", res);
             if (res.data) {
                 message.success("Đăng ký tài khoản thành công!")
                 setIsLoading(false)
@@ -32,7 +31,6 @@ const RegisterPage = () => {
         } catch (error) {
             setIsLoading(false)
             console.log(error);
-            
         }
     }
     
