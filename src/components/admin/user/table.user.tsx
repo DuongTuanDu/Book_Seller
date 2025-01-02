@@ -7,6 +7,7 @@ import { Button, Space, Tag, Tooltip } from 'antd';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DetailUser from './detail.user';
+import CreateUser from './create.user';
 
 interface TSearch {
     fullName: string;
@@ -169,6 +170,11 @@ const TableUser = () => {
                 setOpenViewDetail={setOpenViewDetail}
                 dataViewDetail={dataViewDetail}
                 setDataViewDetail={setDataViewDetail}
+            />
+            <CreateUser
+                openModalCreate={openCreateModal}
+                setOpenModalCreate={setOpenCreateModal}
+                refreshTable={refreshTable}
             />
         </>
     );
