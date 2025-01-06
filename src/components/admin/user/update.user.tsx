@@ -1,56 +1,75 @@
-import { createUserAPI } from "@/services/api";
-import { App, Divider, Form, Input, Modal } from "antd";
-import { FormProps } from "antd/lib";
-import { useState } from "react";
+import { useEffect, useState } from 'react';
+import { App, Divider, Form, Input, Modal } from 'antd';
+import type { FormProps } from 'antd';
+import { UpdateUserAPI } from '@/services/api';
 
 interface IProps {
-    openModalCreate: boolean;
-    setOpenModalCreate: (v: boolean) => void;
+    openModalUpdate: boolean;
+    setOpenModalUpdate: (v: boolean) => void;
     refreshTable: () => void;
+    setDataUpdate: (v: IUserTable | null) => void;
+    dataUpdate: IUserTable | null;
 }
 
 type FieldType = {
-    fullName: string;
-    password: string;
+    _id: string;
     email: string;
+    fullName: string;
     phone: string;
-}
+};
 
-const CreateUser = (props: IProps) => {
-    const { openModalCreate, setOpenModalCreate, refreshTable } = props;
+const UpdateUser = (props: IProps) => {
+    const { openModalUpdate, setOpenModalUpdate, refreshTable,
+        setDataUpdate, dataUpdate
+    } = props;
     const [isSubmit, setIsSubmit] = useState<boolean>(false);
     const { message, notification } = App.useApp();
 
+    // https://ant.design/components/form#components-form-demo-control-hooks
     const [form] = Form.useForm();
 
+    useEffect(() => {
+        if (dataUpdate) {
+            form.setFieldsValue({
+                _id: dataUpdate._id,
+                fullName: dataUpdate.fullName,
+                email: dataUpdate.email,
+                phone: dataUpdate.phone
+            })
+        }
+    }, [dataUpdate])
+
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
-        const { fullName, password, email, phone } = values;
-        setIsSubmit(true);
-        const res = await createUserAPI(fullName, email, password, phone);
-        if (res.data) {
-            message.success("Tạo mới người dùng thành công!");
-            setOpenModalCreate(false);
+        const { _id, fullName, phone } = values;
+        setIsSubmit(true)
+        const res = await UpdateUserAPI(_id, fullName, phone);
+        if (res && res.data) {
+            message.success('Cập nhật user thành công');
             form.resetFields();
+            setOpenModalUpdate(false);
+            setDataUpdate(null);
             refreshTable();
         } else {
             notification.error({
-                message: 'Đã có lỗi xảy ra!',
+                message: 'Đã có lỗi xảy ra',
                 description: res.message
             })
         }
-        setIsSubmit(false);
-    }
+        setIsSubmit(false)
+    };
+
     return (
         <>
             <Modal
-                title="Thêm mới người dùng"
-                open={openModalCreate}
+                title="Cập nhật người dùng"
+                open={openModalUpdate}
                 onOk={() => { form.submit() }}
                 onCancel={() => {
-                    setOpenModalCreate(false);
+                    setOpenModalUpdate(false);
+                    setDataUpdate(null);
                     form.resetFields();
                 }}
-                okText={"Tạo mới"}
+                okText={"Cập nhật"}
                 cancelText={"Hủy"}
                 confirmLoading={isSubmit}
             >
@@ -58,7 +77,7 @@ const CreateUser = (props: IProps) => {
 
                 <Form
                     form={form}
-                    name="basic"
+                    name="form-update"
                     style={{ maxWidth: 600 }}
                     onFinish={onFinish}
                     autoComplete="off"
@@ -69,21 +88,18 @@ const CreateUser = (props: IProps) => {
                     }}
                 >
                     <Form.Item<FieldType>
+                        hidden
                         labelCol={{ span: 24 }}
-                        label="Tên hiển thị"
-                        name="fullName"
-                        rules={[{ required: true, message: 'Vui lòng nhập tên hiển thị!' }]}
+                        label="_id"
+                        name="_id"
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập _id!' },
+
+                        ]}
                     >
-                        <Input />
+                        <Input disabled />
                     </Form.Item>
-                    <Form.Item<FieldType>
-                        labelCol={{ span: 24 }}
-                        label="Password"
-                        name="password"
-                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-                    >
-                        <Input.Password />
-                    </Form.Item>
+
                     <Form.Item<FieldType>
                         labelCol={{ span: 24 }}
                         label="Email"
@@ -93,8 +109,19 @@ const CreateUser = (props: IProps) => {
                             { type: "email", message: 'Email không đúng định dạng!' },
                         ]}
                     >
+                        <Input disabled />
+                    </Form.Item>
+
+                    <Form.Item<FieldType>
+                        labelCol={{ span: 24 }}
+                        label="Tên hiển thị"
+                        name="fullName"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên hiển thị!' }]}
+                    >
                         <Input />
                     </Form.Item>
+
+
                     <Form.Item<FieldType>
                         labelCol={{ span: 24 }}
                         label="Số điện thoại"
@@ -107,6 +134,6 @@ const CreateUser = (props: IProps) => {
             </Modal>
         </>
     );
-}
+};
 
-export default CreateUser;
+export default UpdateUser;
