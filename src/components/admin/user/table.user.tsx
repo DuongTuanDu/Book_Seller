@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import DetailUser from './detail.user';
 import CreateUser from './create.user';
 import ImportUser from './data/import.user';
+import { CSVLink } from 'react-csv';
 
 interface TSearch {
     fullName: string;
@@ -30,6 +31,8 @@ const TableUser = () => {
 
     const [openCreateModal, setOpenCreateModal] = useState<boolean>(false);
     const [openModalImport, setOpenModalImport] = useState<boolean>(false);
+
+    const [currentDataTable, setCurrentDataTable] = useState<IUserTable[]>([]);
 
     const columns: ProColumns<IUserTable>[] = [
         {
@@ -141,6 +144,7 @@ const TableUser = () => {
                     const res = await getUsersAPI(query);
                     if (res.data) {
                         setMeta(res.data.meta)
+                        setCurrentDataTable(res.data?.result ?? [])
                     }
                     return {
                         data: res.data?.result,
@@ -164,7 +168,12 @@ const TableUser = () => {
                         icon={<ExportOutlined />}
                         type="primary"
                     >
-                        Export
+                        <CSVLink
+                            data={currentDataTable}
+                            filename="export-user.csv"
+                        >
+                            Export
+                        </CSVLink>
                     </Button>,
                     <Button
                         icon={<CloudUploadOutlined />}
