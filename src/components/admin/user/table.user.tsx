@@ -134,6 +134,8 @@ const TableUser = () => {
 
                     if (sort && sort.createdAt) {
                         query += `&sort=${sort.createdAt === "ascend" ? "createdAt" : "-createdAt"}`
+                    } else {
+                        query += `&sort=-createdAt`
                     }
 
                     const res = await getUsersAPI(query);
@@ -197,6 +199,7 @@ const TableUser = () => {
             <ImportUser
                 openModalImport={openModalImport}
                 setOpenModalImport={setOpenModalImport}
+                refreshTable={refreshTable}
             />
         </>
     );
