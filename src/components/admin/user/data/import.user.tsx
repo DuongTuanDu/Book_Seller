@@ -55,15 +55,15 @@ const ImportUser = (props: IProps) => {
                     //convert file to json
                     let jsonData: IDataImport[] = [];
                     workbook.worksheets.forEach(function (sheet) {
-                        let firstRow = sheet.getRow(1);
+                        const firstRow = sheet.getRow(1);
                         if (!firstRow.cellCount) return;
 
-                        let keys = firstRow.values as any[];
+                        const keys = firstRow.values as any[];
 
                         sheet.eachRow(function (row, rowNumber) {
                             if (rowNumber === 1) return;
-                            let values = row.values as any[];
-                            let obj: any = {};
+                            const values = row.values as any[];
+                            const obj: any = {};
                             for (let i = 0; i < keys.length; i++) {
                                 obj[keys[i]] = values[i];
                             }
