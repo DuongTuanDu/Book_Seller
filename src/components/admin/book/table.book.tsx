@@ -8,6 +8,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { dateRangeValidate } from '@/services/helper';
 import { getBooksAPI } from '@/services/api';
 import DetailBook from './detail.book';
+import CreateBook from './create.book';
 
 type TSearch = {
     mainText: string;
@@ -110,8 +111,6 @@ const TableBook = () => {
                                 <DeleteTwoTone twoToneColor="#ff4d4f" />
                             </span>
                         </Popconfirm>
-
-
                     </>
 
                 )
@@ -209,6 +208,12 @@ const TableBook = () => {
                 setOpenViewDetail={setOpenViewDetail}
                 dataViewDetail={dataViewDetail}
                 setDataViewDetail={setDataViewDetail}
+            />
+
+            <CreateBook
+                openModalCreate={openModalCreate}
+                setOpenModalCreate={setOpenModalCreate}
+                refreshTable={refreshTable}
             />
         </>
     )
