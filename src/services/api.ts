@@ -59,3 +59,14 @@ export const UpdateUserAPI = (_id: string, fullName: string, phone: string) => {
     const urlBackend = "/api/v1/user"
     return axios.put<IBackendRes<IRegister>>(urlBackend, { _id, fullName, phone })
 }
+
+export const getBooksAPI = (query: string) => {
+    const urlBackend = `/api/v1/book?${query}`;
+    return axios.get<IBackendRes<IModelPaginate<IBookTable>>>(urlBackend,
+        {
+            headers: {
+                delay: 100
+            }
+        }
+    )
+}
