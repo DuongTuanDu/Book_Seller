@@ -6,9 +6,10 @@ import { CSVLink } from 'react-csv';
 import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { dateRangeValidate } from '@/services/helper';
-import { getBooksAPI } from '@/services/api';
+import { deleteBookAPI, getBooksAPI } from '@/services/api';
 import DetailBook from './detail.book';
 import CreateBook from './create.book';
+import UpdateBook from './update.book';
 
 type TSearch = {
     mainText: string;
@@ -33,8 +34,30 @@ const TableBook = () => {
     const [dataViewDetail, setDataViewDetail] = useState<IBookTable | null>(null);
     const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
 
+    const [openModalUpdate, setOpenModalUpdate] = useState<boolean>(false);
+    const [dataUpdate, setDataUpdate] = useState<IBookTable | null>(null);
+
+    const [isDeleteBook, setIsDeleteBook] = useState<boolean>(false);
+    const [currentDataTable, setCurrentDataTable] = useState<IBookTable[]>([]);
+    const { message, notification } = App.useApp();
+
     const refreshTable = () => {
         actionRef.current?.reload();
+    }
+
+    const handleDeleteBook = async (_id: string) => {
+        setIsDeleteBook(true)
+        const res = await deleteBookAPI(_id);
+        if (res && res.data) {
+            message.success('Xóa book thành công');
+            refreshTable();
+        } else {
+            notification.error({
+                message: 'Đã có lỗi xảy ra',
+                description: res.message
+            })
+        }
+        setIsDeleteBook(false)
     }
 
     const columns: ProColumns<IBookTable>[] = [
@@ -98,14 +121,20 @@ const TableBook = () => {
                     <>
                         <EditTwoTone
                             twoToneColor="#f57800" style={{ cursor: "pointer", margin: "0 10px" }}
+                            onClick={() => {
+                                setOpenModalUpdate(true);
+                                setDataUpdate(entity);
+                            }}
                         />
 
                         <Popconfirm
                             placement="leftTop"
                             title={"Xác nhận xóa book"}
                             description={"Bạn có chắc chắn muốn xóa book này ?"}
+                            onConfirm={() => handleDeleteBook(entity._id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
+                            okButtonProps={{ loading: isDeleteBook }}
                         >
                             <span style={{ cursor: "pointer" }}>
                                 <DeleteTwoTone twoToneColor="#ff4d4f" />
@@ -161,6 +190,7 @@ const TableBook = () => {
                     const res = await getBooksAPI(query);
                     if (res.data) {
                         setMeta(res.data.meta);
+                        setCurrentDataTable(res.data?.result ?? [])
                     }
                     return {
                         data: res.data?.result,
@@ -183,12 +213,17 @@ const TableBook = () => {
 
                 headerTitle="Table book"
                 toolBarRender={() => [
-                    <Button
-                        icon={<ExportOutlined />}
-                        type="primary"
+                    <CSVLink
+                        data={currentDataTable}
+                        filename='export-book.csv'
                     >
-                        Export
-                    </Button>
+                        <Button
+                            icon={<ExportOutlined />}
+                            type="primary"
+                        >
+                            Export
+                        </Button>
+                    </CSVLink >
                     ,
 
                     <Button
@@ -214,6 +249,14 @@ const TableBook = () => {
                 openModalCreate={openModalCreate}
                 setOpenModalCreate={setOpenModalCreate}
                 refreshTable={refreshTable}
+            />
+
+            <UpdateBook
+                openModalUpdate={openModalUpdate}
+                setOpenModalUpdate={setOpenModalUpdate}
+                refreshTable={refreshTable}
+                dataUpdate={dataUpdate}
+                setDataUpdate={setDataUpdate}
             />
         </>
     )
