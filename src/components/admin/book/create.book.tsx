@@ -144,13 +144,21 @@ const CreateBook = (props: IProps) => {
 
     const handleChange = (info: UploadChangeParam, type: UserUploadType) => {
         if (info.file.status === 'uploading') {
-            type === "slider" ? setLoadingSlider(true) : setLoadingThumbnail(true);
+            if (type === "slider") {
+                setLoadingSlider(true);
+            } else {
+                setLoadingThumbnail(true);
+            }
             return;
         }
-
+    
         if (info.file.status === 'done') {
             // Get this url from response in real world.
-            type === "slider" ? setLoadingSlider(false) : setLoadingThumbnail(false);
+            if (type === "slider") {
+                setLoadingSlider(false);
+            } else {
+                setLoadingThumbnail(false);
+            }
         }
     };
 

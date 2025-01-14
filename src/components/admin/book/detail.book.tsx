@@ -26,7 +26,8 @@ const DetailBook = (props: IProps) => {
 
     useEffect(() => {
         if (dataViewDetail) {
-            let imgThumbnail: any = {}, imgSlider: UploadFile[] = [];
+            let imgThumbnail: any = {};
+            const imgSlider: UploadFile[] = [];
             if (dataViewDetail.thumbnail) {
                 imgThumbnail = {
                     uid: uuidv4(),

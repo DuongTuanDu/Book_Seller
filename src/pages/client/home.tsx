@@ -1,5 +1,5 @@
 import { getBooksAPI, getCategoryAPI } from '@/services/api';
-import { FilterTwoTone, ReloadOutlined } from '@ant-design/icons';
+import { FilterTwoTone, LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 import {
     Row, Col, Form, Checkbox, Divider, InputNumber,
     Button, Rate, Tabs, Pagination, Spin
@@ -20,10 +20,88 @@ type FieldType = {
 
 const HomePage = () => {
     const [form] = Form.useForm();
+    const [listCategory, setListCategory] = useState<{
+        label: string, value: string
+    }[]>([]);
+
+    const [listBook, setListBook] = useState<IBookTable[]>([]);
+    const [current, setCurrent] = useState<number>(1);
+    const [pageSize, setPageSize] = useState<number>(10);
+    const [total, setTotal] = useState<number>(0);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [filter, setFilter] = useState<string>("");
+    const [sortQuery, setSortQuery] = useState<string>("sort=-sold");
+
+    const handleFetchCategory = async () => {
+        const res = await getCategoryAPI();
+        if (res && res.data) {
+            const d = res.data.map(item => {
+                return { label: item, value: item }
+            })
+            setListCategory(d);
+        }
+    }
+
+    useEffect(() => {
+        handleFetchCategory();
+    }, [])
+
+    useEffect(() => {
+        fetchBook();
+    }, [current, pageSize, filter, sortQuery]);
+
+    const fetchBook = async () => {
+        setIsLoading(true)
+        let query = `current=${current}&pageSize=${pageSize}`;
+
+        if (filter) {
+            query += `&${filter}`;
+        }
+        if (sortQuery) {
+            query += `&${sortQuery}`;
+        }
+
+        const res = await getBooksAPI(query);
+        if (res && res.data) {
+            setListBook(res.data.result);
+            setTotal(res.data.meta.total)
+        }
+        setIsLoading(false)
+    }
+
+    const handleOnchangePage = (pagination: { current: number, pageSize: number }) => {
+        if (pagination && pagination.current !== current) {
+            setCurrent(pagination.current)
+        }
+        if (pagination && pagination.pageSize !== pageSize) {
+            setPageSize(pagination.pageSize)
+            setCurrent(1);
+        }
+    }
+
+    const handleChangeFilter = (changedValues: any, values: any) => {
+        //only fire if category changes
+        if (changedValues.category) {
+            const cate = values.category;
+            if (cate && cate.length > 0) {
+                const f = cate.join(',');
+                setFilter(`category=${f}`)
+            } else {
+                //reset data -> fetch all
+                setFilter('');
+            }
+        }
+    }
 
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
-
-
+        if (values?.range?.from >= 0 && values?.range?.to >= 0) {
+            let f = `price>=${values?.range?.from}&price<=${values?.range?.to}`;
+            if (values?.category?.length) {
+                const cate = values?.category?.join(',');
+                f += `&category=${cate}`
+            }
+            setFilter(f);
+        }
     }
 
     const onChange = (key: string) => {
@@ -74,6 +152,7 @@ const HomePage = () => {
                                 <Form
                                     onFinish={onFinish}
                                     form={form}
+                                    onValuesChange={(changedValues, values) => handleChangeFilter(changedValues, values)}
                                 >
                                     <Form.Item
                                         name="category"
@@ -82,15 +161,15 @@ const HomePage = () => {
                                     >
                                         <Checkbox.Group>
                                             <Row>
-                                                <Col span={24}>
-                                                    <Checkbox value="all">Tất cả</Checkbox>
-                                                </Col>
-                                                <Col span={24}>
-                                                    <Checkbox value="new">Mới</Checkbox>
-                                                </Col>
-                                                <Col span={24}>
-                                                    <Checkbox value="best">Phổ biến</Checkbox>
-                                                </Col>
+                                                {listCategory?.map((item, index) => {
+                                                    return (
+                                                        <Col span={24} key={`index-${index}`} style={{ padding: '7px 0' }}>
+                                                            <Checkbox value={item.value} >
+                                                                {item.label}
+                                                            </Checkbox>
+                                                        </Col>
+                                                    )
+                                                })}
                                             </Row>
                                         </Checkbox.Group>
                                     </Form.Item>
@@ -162,122 +241,51 @@ const HomePage = () => {
                         </Col>
 
                         <Col md={20} xs={24} >
-                            <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
-                                <Row >
-                                    <Tabs
-                                        defaultActiveKey="sort=-sold"
-                                        items={items}
-                                        onChange={onChange}
-                                        style={{ overflowX: "auto" }}
-                                    />
-                                </Row>
-                                <Row className='customize-row'>
-                                    <div
-                                        className="column">
-                                        <div className='wrapper'>
-                                            <div className='thumbnail'>
-                                                <img src="http://localhost:8080/images/book/1-5e81d7f66dada42752efb220d7b2956c.jpg" alt="thumbnail book" />
-                                            </div>
-                                            <div className='text'>Tư Duy Về Tiền Bạc - Những Lựa Chọn Tài Chính Đúng Đắn Và Sáng Suốt Hơn</div>
-                                            <div className='price'>
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(100000)}
-                                            </div>
-                                            <div className='rating'>
-                                                <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
-                                                <span>Đã bán 1K</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        className="column">
-                                        <div className='wrapper'>
-                                            <div className='thumbnail'>
-                                                <img src="http://localhost:8080/images/book/1-5e81d7f66dada42752efb220d7b2956c.jpg" alt="thumbnail book" />
-                                            </div>
-                                            <div className='text'>Tư Duy Về Tiền Bạc - Những Lựa Chọn Tài Chính Đúng Đắn Và Sáng Suốt Hơn</div>
-                                            <div className='price'>
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(100000)}
-                                            </div>
-                                            <div className='rating'>
-                                                <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
-                                                <span>Đã bán 1K</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        className="column">
-                                        <div className='wrapper'>
-                                            <div className='thumbnail'>
-                                                <img src="http://localhost:8080/images/book/1-5e81d7f66dada42752efb220d7b2956c.jpg" alt="thumbnail book" />
-                                            </div>
-                                            <div className='text'>Tư Duy Về Tiền Bạc - Những Lựa Chọn Tài Chính Đúng Đắn Và Sáng Suốt Hơn</div>
-                                            <div className='price'>
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(100000)}
-                                            </div>
-                                            <div className='rating'>
-                                                <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
-                                                <span>Đã bán 1K</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        className="column">
-                                        <div className='wrapper'>
-                                            <div className='thumbnail'>
-                                                <img src="http://localhost:8080/images/book/1-5e81d7f66dada42752efb220d7b2956c.jpg" alt="thumbnail book" />
-                                            </div>
-                                            <div className='text'>Tư Duy Về Tiền Bạc - Những Lựa Chọn Tài Chính Đúng Đắn Và Sáng Suốt Hơn</div>
-                                            <div className='price'>
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(100000)}
-                                            </div>
-                                            <div className='rating'>
-                                                <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
-                                                <span>Đã bán 1K</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        className="column">
-                                        <div className='wrapper'>
-                                            <div className='thumbnail'>
-                                                <img src="http://localhost:8080/images/book/1-5e81d7f66dada42752efb220d7b2956c.jpg" alt="thumbnail book" />
-                                            </div>
-                                            <div className='text'>Tư Duy Về Tiền Bạc - Những Lựa Chọn Tài Chính Đúng Đắn Và Sáng Suốt Hơn</div>
-                                            <div className='price'>
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(100000)}
-                                            </div>
-                                            <div className='rating'>
-                                                <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
-                                                <span>Đã bán 1K</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        className="column">
-                                        <div className='wrapper'>
-                                            <div className='thumbnail'>
-                                                <img src="http://localhost:8080/images/book/1-5e81d7f66dada42752efb220d7b2956c.jpg" alt="thumbnail book" />
-                                            </div>
-                                            <div className='text'>Tư Duy Về Tiền Bạc - Những Lựa Chọn Tài Chính</div>
-                                            <div className='price'>
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(100000)}
-                                            </div>
-                                            <div className='rating'>
-                                                <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
-                                                <span>Đã bán 1K</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Row>
-                                <div style={{ marginTop: 30 }}></div>
-                                <Row style={{ display: "flex", justifyContent: "center" }}>
-                                    <Pagination
-                                        defaultCurrent={6}
-                                        total={500}
-                                        responsive
-                                    />
-                                </Row>
-                            </div>
+                            <Spin indicator={<LoadingOutlined spin style={{ fontSize: 24 }} />} spinning={isLoading} tip="Loading...">
+                                <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
+                                    <Row >
+                                        <Tabs
+                                            defaultActiveKey="sort=-sold"
+                                            items={items}
+                                            onChange={(value) => { setSortQuery(value) }}
+                                            style={{ overflowX: "auto" }}
+                                        />
+                                    </Row>
+                                    <Row className='customize-row'>
+                                        {listBook?.map((item, index) => {
+                                            return (
+                                                <div
+                                                    // onClick={() => navigate(`/book/${item._id}`)}
+                                                    className="column" key={`book-${index}`}>
+                                                    <div className='wrapper'>
+                                                        <div className='thumbnail'>
+                                                            <img src={`${import.meta.env.VITE_BACKEND_URL}/images/book/${item.thumbnail}`} alt="thumbnail book" />
+                                                        </div>
+                                                        <div className='text' title={item.mainText}>{item.mainText}</div>
+                                                        <div className='price'>
+                                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item?.price ?? 0)}
+                                                        </div>
+                                                        <div className='rating'>
+                                                            <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
+                                                            <span>Đã bán {item?.sold ?? 0}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </Row>
+                                    <div style={{ marginTop: 30 }}></div>
+                                    <Row style={{ display: "flex", justifyContent: "center" }}>
+                                        <Pagination
+                                            current={current}
+                                            total={total}
+                                            pageSize={pageSize}
+                                            responsive
+                                            onChange={(p, s) => handleOnchangePage({ current: p, pageSize: s })}
+                                        />
+                                    </Row>
+                                </div>
+                            </Spin>
                         </Col>
                     </Row>
                 </div>
