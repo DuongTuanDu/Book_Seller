@@ -29,6 +29,9 @@ export default tseslint.config(
         { allowSingleExtends: true }, // Cho phép các interface mở rộng
       ],
       '@typescript-eslint/no-explicit-any': 'off', // Tắt rule này
+      "react-hooks/exhaustive-deps": {
+        "ignore": ["notification"]
+      }
     },
   },
 )

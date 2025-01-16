@@ -1,3 +1,4 @@
+import MobileFilter from '@/components/client/book/mobile.filter';
 import { getBooksAPI, getCategoryAPI } from '@/services/api';
 import { FilterTwoTone, LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 import {
@@ -6,7 +7,7 @@ import {
 } from 'antd';
 import type { FormProps } from 'antd';
 import { useEffect, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import 'styles/home.scss';
 
 type FieldType = {
@@ -20,6 +21,7 @@ type FieldType = {
 
 const HomePage = () => {
     const [form] = Form.useForm();
+    const navigate = useNavigate();
     const [listCategory, setListCategory] = useState<{
         label: string, value: string
     }[]>([]);
@@ -31,6 +33,7 @@ const HomePage = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [filter, setFilter] = useState<string>("");
     const [sortQuery, setSortQuery] = useState<string>("sort=-sold");
+    const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false);
 
     const handleFetchCategory = async () => {
         const res = await getCategoryAPI();
@@ -250,12 +253,20 @@ const HomePage = () => {
                                             onChange={(value) => { setSortQuery(value) }}
                                             style={{ overflowX: "auto" }}
                                         />
+                                        <Col xs={24} md={0}>
+                                            <div style={{ marginBottom: 20 }} >
+                                                <span onClick={() => setShowMobileFilter(true)}>
+                                                    <FilterTwoTone />
+                                                    <span style={{ fontWeight: 500 }}> Lọc</span>
+                                                </span>
+                                            </div>
+                                        </Col>
                                     </Row>
                                     <Row className='customize-row'>
                                         {listBook?.map((item, index) => {
                                             return (
                                                 <div
-                                                    // onClick={() => navigate(`/book/${item._id}`)}
+                                                    onClick={() => navigate(`/book/${item._id}`)}
                                                     className="column" key={`book-${index}`}>
                                                     <div className='wrapper'>
                                                         <div className='thumbnail'>
@@ -290,6 +301,13 @@ const HomePage = () => {
                     </Row>
                 </div>
             </div>
+            <MobileFilter
+                isOpen={showMobileFilter}
+                setIsOpen={setShowMobileFilter}
+                handleChangeFilter={handleChangeFilter}
+                listCategory={listCategory}
+                onFinish={onFinish}
+            />
         </>
     )
 }
