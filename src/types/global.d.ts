@@ -80,4 +80,10 @@ declare global {
         countError: number;
         detail: any;
     }
+
+    interface ICart {
+        _id: string;
+        quantity: number;
+        detail: IBookTable;
+    }
 }

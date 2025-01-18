@@ -1,4 +1,4 @@
-import { Avatar, Badge, Divider, Drawer, Dropdown, Popover, Space } from "antd";
+import { Avatar, Badge, Divider, Drawer, Dropdown, Empty, Popover, Space } from "antd";
 import { useCurrentApp } from "components/context/app.context"
 import { useState } from "react";
 import { FaReact } from "react-icons/fa";
@@ -9,7 +9,7 @@ import './app.header.scss';
 import { logoutAPI } from "@/services/api";
 
 const AppHeader = () => {
-    const { user, isAuthenticated, setIsAuthenticated, setUser } = useCurrentApp()
+    const { user, isAuthenticated, setIsAuthenticated, setUser, carts } = useCurrentApp()
     const navigate = useNavigate();
     const [openDrawer, setOpenDrawer] = useState(false);
     const [openManageAccount, setOpenManageAccount] = useState<boolean>(false);
@@ -55,7 +55,7 @@ const AppHeader = () => {
     const contentPopover = () => {
         return (
             <div className='pop-cart-body'>
-                {/* <div className='pop-cart-content'>
+                <div className='pop-cart-content'>
                     {carts?.map((book, index) => {
                         return (
                             <div className='book' key={`book-${index}`}>
@@ -76,7 +76,7 @@ const AppHeader = () => {
                     <Empty
                         description="Không có sản phẩm trong giỏ hàng"
                     />
-                } */}
+                }
             </div>
         )
     }
@@ -115,8 +115,7 @@ const AppHeader = () => {
                                     content={contentPopover}
                                     arrow={true}>
                                     <Badge
-                                        // count={carts?.length ?? 0}
-                                        count={10}
+                                        count={carts?.length ?? 0}
                                         size={"small"}
                                         showZero
                                     >

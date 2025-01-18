@@ -224,19 +224,15 @@ const HomePage = () => {
                                         </div>
                                         <div>
                                             <Rate value={4} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                         <div>
                                             <Rate value={3} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                         <div>
                                             <Rate value={2} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                         <div>
                                             <Rate value={1} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                     </Form.Item>
                                 </Form>

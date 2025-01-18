@@ -6,14 +6,16 @@ import { BsCartPlus } from 'react-icons/bs';
 import 'styles/book.scss';
 import ModalGallery from './modal.gallery';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCurrentApp } from '@/components/context/app.context';
 
 interface IProps {
-    currentBook: IBookTable | null;
+    currentBook: IBookTable;
 }
 
 type UserAction = "MINUS" | "PLUS"
 
 const BookDetail = (props: IProps) => {
+    const { message } = App.useApp();
     const { currentBook } = props;
     const [imageGallery, setImageGallery] = useState<{
         original: string;
@@ -27,6 +29,7 @@ const BookDetail = (props: IProps) => {
 
     const refGallery = useRef<ImageGallery>(null);
     const [currentQuantity, setCurrentQuantity] = useState<number>(1);
+    const { carts, setCarts } = useCurrentApp();
 
     useEffect(() => {
         if (currentBook) {
@@ -82,6 +85,39 @@ const BookDetail = (props: IProps) => {
             }
         }
     }
+
+    const handleAddToCart = () => {
+        //update localstorage
+        const cartStorage = localStorage.getItem("carts");
+        if (cartStorage && currentBook) {
+            const carts = JSON.parse(cartStorage) as ICart[];
+
+            //check exist
+            const isExisted = carts.findIndex(item => item._id === currentBook?._id);
+            if (isExisted > -1) {
+                carts[isExisted].quantity = carts[isExisted].quantity + currentQuantity;
+            } else {
+                carts.push({ _id: currentBook._id, quantity: currentQuantity, detail: currentBook });
+            }
+            localStorage.setItem("carts", JSON.stringify(carts));
+            //sync React Context
+            setCarts(carts);
+        } else {
+            //create
+            const data = [{
+                _id: currentBook?._id,
+                quantity: currentQuantity,
+                detail: currentBook!
+            }]
+            localStorage.setItem("carts", JSON.stringify(data));
+            //sync React Context
+            setCarts(data);
+        }
+        message.success("Thêm sản phẩm vào giỏ hàng thành công!");
+    }
+
+    console.log("carts", carts);
+    
 
     return (
         <div style={{ background: '#efefef', padding: "20px 0" }}>
@@ -153,7 +189,7 @@ const BookDetail = (props: IProps) => {
                                     </span>
                                 </div>
                                 <div className='buy'>
-                                    <button className='cart'>
+                                    <button className='cart' onClick={() => handleAddToCart()}>
                                         <BsCartPlus className='icon-cart' />
                                         <span>Thêm vào giỏ hàng</span>
                                     </button>
