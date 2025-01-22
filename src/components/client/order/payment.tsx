@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Input } from 'antd';
 import { useCurrentApp } from '@/components/context/app.context';
 import type { FormProps } from 'antd';
+import { createOrderAPI } from '@/services/api';
 // import { createOrderAPI } from '@/services/api';
 // import { isMobile } from 'react-device-detect';
 
@@ -29,6 +30,7 @@ const Payment = (props: IProps) => {
     const [form] = Form.useForm();
 
     const [isSubmit, setIsSubmit] = useState(false);
+    const { message, notification } = App.useApp();
     const { setCurrentStep } = props;
 
     useEffect(() => {
@@ -67,34 +69,32 @@ const Payment = (props: IProps) => {
     }
 
     const handlePlaceOrder: FormProps<FieldType>['onFinish'] = async (values) => {
-        // const { address, fullName, method, phone } = values;
-        // const detail = carts.map(item => ({
-        //     _id: item._id,
-        //     quantity: item.quantity,
-        //     bookName: item.detail.mainText
-        // }))
+        const { address, fullName, method, phone } = values;
+        const detail = carts.map(item => ({
+            _id: item._id,
+            quantity: item.quantity,
+            bookName: item.detail.mainText
+        }))
 
-        // setIsSubmit(true);
-        // const res = await createOrderAPI(
-        //     fullName, address, phone, totalPrice, method, detail
-        // );
-        // if (res?.data) {
-        //     localStorage.removeItem("carts");
-        //     setCarts([]);
-        //     message.success('Mua hàng thành công!');
-        //     setCurrentStep(2);
-        // } else {
-        //     notification.error({
-        //         message: "Có lỗi xảy ra",
-        //         description:
-        //             res.message && Array.isArray(res.message) ? res.message[0] : res.message,
-        //         duration: 5
-        //     })
-        // }
+        setIsSubmit(true);
+        const res = await createOrderAPI(
+            fullName, address, phone, totalPrice, method, detail
+        );
+        if (res?.data) {
+            localStorage.removeItem("carts");
+            setCarts([]);
+            message.success('Mua hàng thành công!');
+            setCurrentStep(2);
+        } else {
+            notification.error({
+                message: "Có lỗi xảy ra",
+                description:
+                    res.message && Array.isArray(res.message) ? res.message[0] : res.message,
+                duration: 5
+            })
+        }
 
-        // setIsSubmit(false);
-        console.log("values", values);
-
+        setIsSubmit(false);
     }
 
     return (
