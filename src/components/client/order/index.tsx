@@ -5,11 +5,12 @@ import { useCurrentApp } from '@/components/context/app.context';
 import 'styles/order.scss';
 // import { isMobile } from 'react-device-detect';
 
-// interface IProps {
-//     setCurrentStep: (v: number) => void;
-// }
+interface IProps {
+    setCurrentStep: (v: number) => void;
+}
 
-const OrderDetail = () => {
+const OrderDetail = (props: IProps) => {
+    const { setCurrentStep } = props;
     const { carts, setCarts } = useCurrentApp();
     const [totalPrice, setTotalPrice] = useState(0);
 
@@ -61,6 +62,14 @@ const OrderDetail = () => {
             //sync React Context
             setCarts(newCarts);
         }
+    }
+
+    const handleNextStep = () => {
+        if (!carts.length) {
+            message.error("Không tồn tại sản phẩm trogn giỏ hàng")
+            return;
+        }
+        setCurrentStep(1);
     }
 
     return (
@@ -135,6 +144,7 @@ const OrderDetail = () => {
                             <Divider style={{ margin: "10px 0" }} />
                             <Button
                                 color="danger" variant="solid"
+                                onClick={() => handleNextStep()}
                             >
                                 Mua Hàng ({carts?.length ?? 0})
                             </Button>
