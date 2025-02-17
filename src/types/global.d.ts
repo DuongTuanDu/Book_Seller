@@ -75,7 +75,7 @@ declare global {
         updatedAt: Date;
     }
 
-    interface IResponseImport{
+    interface IResponseImport {
         countSuccess: number;
         countError: number;
         detail: any;
@@ -85,5 +85,26 @@ declare global {
         _id: string;
         quantity: number;
         detail: IBookTable;
+    }
+
+    interface IHistory {
+        _id: string;
+        name: string;
+        type: string;
+        email: string;
+        phone: string;
+        userId: string;
+        detail:
+        {
+            bookName: string;
+            quantity: number;
+            _id: string;
+        }[];
+        totalPrice: number;
+        createdAt: Date;
+        updatedAt: Date;
+    }
+    interface IOrderTable extends IHistory {
+
     }
 }

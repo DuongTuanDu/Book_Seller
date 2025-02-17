@@ -143,3 +143,37 @@ export const createOrderAPI = (
     return axios.post<IBackendRes<IRegister>>(urlBackend,
         { name, address, phone, totalPrice, type, detail })
 }
+
+export const getHistoryAPI = () => {
+    const urlBackend = `/api/v1/history`;
+    return axios.get<IBackendRes<IHistory[]>>(urlBackend)
+}
+
+export const updateUserInfoAPI = (
+    _id: string, avatar: string,
+    fullName: string, phone: string) => {
+    const urlBackend = "/api/v1/user";
+    return axios.put<IBackendRes<IRegister>>(urlBackend,
+        { fullName, phone, avatar, _id })
+}
+
+export const updateUserPasswordAPI = (
+    email: string, oldpass: string, newpass: string) => {
+    const urlBackend = "/api/v1/user/change-password";
+    return axios.post<IBackendRes<IRegister>>(urlBackend,
+        { email, oldpass, newpass })
+}
+
+export const getDashboardAPI = () => {
+    const urlBackend = `/api/v1/database/dashboard`;
+    return axios.get<IBackendRes<{
+        countOrder: number;
+        countUser: number;
+        countBook: number;
+    }>>(urlBackend)
+}
+
+export const getOrdersAPI = (query: string) => {
+    const urlBackend = `/api/v1/order?${query}`;
+    return axios.get<IBackendRes<IModelPaginate<IOrderTable>>>(urlBackend)
+}

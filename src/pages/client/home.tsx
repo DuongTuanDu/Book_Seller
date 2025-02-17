@@ -1,13 +1,13 @@
 import MobileFilter from '@/components/client/book/mobile.filter';
 import { getBooksAPI, getCategoryAPI } from '@/services/api';
-import { FilterTwoTone, LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
+import { FilterTwoTone, ReloadOutlined } from '@ant-design/icons';
 import {
     Row, Col, Form, Checkbox, Divider, InputNumber,
     Button, Rate, Tabs, Pagination, Spin
 } from 'antd';
 import type { FormProps } from 'antd';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import 'styles/home.scss';
 
 type FieldType = {
@@ -20,8 +20,8 @@ type FieldType = {
 
 
 const HomePage = () => {
-    const [form] = Form.useForm();
-    const navigate = useNavigate();
+    const [searchTerm] = useOutletContext() as any;
+
     const [listCategory, setListCategory] = useState<{
         label: string, value: string
     }[]>([]);
@@ -30,38 +30,45 @@ const HomePage = () => {
     const [current, setCurrent] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
     const [total, setTotal] = useState<number>(0);
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [filter, setFilter] = useState<string>("");
     const [sortQuery, setSortQuery] = useState<string>("sort=-sold");
     const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false);
 
-    const handleFetchCategory = async () => {
-        const res = await getCategoryAPI();
-        if (res && res.data) {
-            const d = res.data.map(item => {
-                return { label: item, value: item }
-            })
-            setListCategory(d);
-        }
-    }
+    const [form] = Form.useForm();
+
+    const navigate = useNavigate();
 
     useEffect(() => {
-        handleFetchCategory();
-    }, [])
+        const initCategory = async () => {
+            const res = await getCategoryAPI();
+            if (res && res.data) {
+                const d = res.data.map(item => {
+                    return { label: item, value: item }
+                })
+                setListCategory(d);
+            }
+        }
+        initCategory();
+    }, []);
 
     useEffect(() => {
         fetchBook();
-    }, [current, pageSize, filter, sortQuery]);
+    }, [current, pageSize, filter, sortQuery, searchTerm]);
 
     const fetchBook = async () => {
         setIsLoading(true)
         let query = `current=${current}&pageSize=${pageSize}`;
-
         if (filter) {
             query += `&${filter}`;
         }
         if (sortQuery) {
             query += `&${sortQuery}`;
+        }
+
+        if (searchTerm) {
+            query += `&mainText=/${searchTerm}/i`;
         }
 
         const res = await getBooksAPI(query);
@@ -80,7 +87,9 @@ const HomePage = () => {
             setPageSize(pagination.pageSize)
             setCurrent(1);
         }
+
     }
+
 
     const handleChangeFilter = (changedValues: any, values: any) => {
         //only fire if category changes
@@ -94,6 +103,7 @@ const HomePage = () => {
                 setFilter('');
             }
         }
+
     }
 
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
@@ -105,6 +115,7 @@ const HomePage = () => {
             }
             setFilter(f);
         }
+
     }
 
     const onChange = (key: string) => {
@@ -148,6 +159,7 @@ const HomePage = () => {
                                     </span>
                                     <ReloadOutlined title="Reset" onClick={() => {
                                         form.resetFields();
+                                        setFilter('');
                                     }}
                                     />
                                 </div>
@@ -224,15 +236,19 @@ const HomePage = () => {
                                         </div>
                                         <div>
                                             <Rate value={4} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                         <div>
                                             <Rate value={3} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                         <div>
                                             <Rate value={2} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                         <div>
                                             <Rate value={1} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text">trở lên</span>
                                         </div>
                                     </Form.Item>
                                 </Form>
@@ -240,7 +256,7 @@ const HomePage = () => {
                         </Col>
 
                         <Col md={20} xs={24} >
-                            <Spin indicator={<LoadingOutlined spin style={{ fontSize: 24 }} />} spinning={isLoading} tip="Loading...">
+                            <Spin spinning={isLoading} tip="Loading...">
                                 <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
                                     <Row >
                                         <Tabs

@@ -15,7 +15,6 @@ import { Link } from 'react-router-dom';
 import { useCurrentApp } from '../context/app.context';
 import type { MenuProps } from 'antd';
 import { logoutAPI } from '@/services/api';
-// import { logoutAPI } from '@/services/api';
 type MenuItem = Required<MenuProps>['items'][number];
 
 const { Content, Footer, Sider } = Layout;
@@ -24,7 +23,10 @@ const { Content, Footer, Sider } = Layout;
 const LayoutAdmin = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [activeMenu, setActiveMenu] = useState('');
-    const { user, isAuthenticated, setUser, setIsAuthenticated } = useCurrentApp();
+    const {
+        user, setUser, setIsAuthenticated, isAuthenticated,
+        setCarts
+    } = useCurrentApp();
 
     const location = useLocation();
 
@@ -60,6 +62,25 @@ const LayoutAdmin = () => {
 
     ];
 
+
+    useEffect(() => {
+        const active: any = items.find(item => location.pathname === (item!.key as any)) ?? "/admin";
+        setActiveMenu(active.key)
+    }, [location])
+
+    const handleLogout = async () => {
+        //todo
+        const res = await logoutAPI();
+        if (res.data) {
+            setUser(null);
+            setCarts([]);
+            setIsAuthenticated(false);
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("carts")
+        }
+    }
+
+
     const itemsDropdown = [
         {
             label: <label
@@ -82,33 +103,18 @@ const LayoutAdmin = () => {
 
     ];
 
-    useEffect(() => {
-        const active: any = items.find(item => location.pathname === (item!.key as any)) ?? "/admin";
-        setActiveMenu(active.key)
-    }, [location])
-
-    const handleLogout = async () => {
-        //todo
-        const res = await logoutAPI();
-        if (res.data) {
-            setUser(null);
-            setIsAuthenticated(false);
-            localStorage.removeItem("access_token");
-        }
-    }
-
     const urlAvatar = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${user?.avatar}`;
 
-    if (!isAuthenticated) {
+    if (isAuthenticated === false) {
         return (
             <Outlet />
         )
     }
 
-    const isAdminRoute = location.pathname.includes('admin');
-    if (isAuthenticated && isAdminRoute) {
+    const isAdminRoute = location.pathname.includes("admin");
+    if (isAuthenticated === true && isAdminRoute === true) {
         const role = user?.role;
-        if (role === 'USER') {
+        if (role === "USER") {
             return (
                 <Outlet />
             )
@@ -164,7 +170,7 @@ const LayoutAdmin = () => {
                         <Outlet />
                     </Content>
                     <Footer style={{ padding: 0, textAlign: "center" }}>
-                        Book Seller &copy; Beoo - Made with <HeartTwoTone />
+                        React Test Fresher &copy; Hỏi Dân IT - Made with <HeartTwoTone />
                     </Footer>
                 </Layout>
             </Layout>

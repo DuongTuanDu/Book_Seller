@@ -1,9 +1,11 @@
+import AdminDashboard from "@/components/admin/dashboard";
+
 const DashBoardPage = () => {
     return (
         <div>
-            DashBoard Page
+            <AdminDashboard />
         </div>
     )
 }
 
-export default DashBoardPage
+export default DashBoardPage;

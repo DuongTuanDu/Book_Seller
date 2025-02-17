@@ -1,10 +1,10 @@
-import OrderDetail from "@/components/client/order";
-import Payment from "@/components/client/order/payment";
-import { Button, Result, Steps } from "antd";
+import { Breadcrumb, Button, Result, Steps } from 'antd';
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import OrderDetail from "@/components/client/order";
+import Payment from '@/components/client/order/payment';
 import 'styles/order.scss';
-// import { isMobile } from 'react-device-detect';
+import { Link } from 'react-router-dom';
+import { isMobile } from 'react-device-detect';
 
 const OrderPage = () => {
 
@@ -13,7 +13,19 @@ const OrderPage = () => {
     return (
         <div style={{ background: '#efefef', padding: "20px 0" }}>
             <div className="order-container" style={{ maxWidth: 1440, margin: '0 auto' }}>
-                <div className="order-steps">
+                <Breadcrumb
+                    separator=">"
+                    items={[
+                        {
+                            title: <Link to={"/"}>Trang Chủ</Link>,
+                        },
+
+                        {
+                            title: 'Chi Tiết Giỏ Hàng',
+                        },
+                    ]}
+                />
+                {!isMobile && <div className="order-steps" style={{ marginTop: 10 }}>
                     <Steps
                         size="small"
                         current={currentStep}
@@ -29,7 +41,8 @@ const OrderPage = () => {
                             },
                         ]}
                     />
-                </div>
+
+                </div>}
                 {currentStep === 0 &&
                     <OrderDetail setCurrentStep={setCurrentStep} />
                 }
@@ -58,6 +71,7 @@ const OrderPage = () => {
                         ]}
                     />
                 }
+
             </div>
         </div>
     )

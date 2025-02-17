@@ -1,29 +1,46 @@
-import { Avatar, Badge, Divider, Drawer, Dropdown, Empty, Popover, Space } from "antd";
-import { useCurrentApp } from "components/context/app.context"
-import { useState } from "react";
-import { FaReact } from "react-icons/fa";
-import { FiShoppingCart } from "react-icons/fi";
-import { VscSearchFuzzy } from "react-icons/vsc";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { FaReact } from 'react-icons/fa'
+import { FiShoppingCart } from 'react-icons/fi';
+import { VscSearchFuzzy } from 'react-icons/vsc';
+import { Divider, Badge, Drawer, Avatar, Popover, Empty } from 'antd';
+import { Dropdown, Space } from 'antd';
+import { useNavigate } from 'react-router';
 import './app.header.scss';
-import { logoutAPI } from "@/services/api";
+import { Link } from 'react-router-dom';
+import { useCurrentApp } from 'components/context/app.context';
+import { logoutAPI } from '@/services/api';
+import ManageAccount from '../client/account';
+import { isMobile } from 'react-device-detect';
 
-const AppHeader = () => {
-    const { user, isAuthenticated, setIsAuthenticated, setUser, carts } = useCurrentApp()
-    const navigate = useNavigate();
+interface IProps {
+    searchTerm: string;
+    setSearchTerm: (v: string) => void;
+}
+
+const AppHeader = (props: IProps) => {
     const [openDrawer, setOpenDrawer] = useState(false);
     const [openManageAccount, setOpenManageAccount] = useState<boolean>(false);
 
+    const {
+        isAuthenticated, user, setUser, setIsAuthenticated,
+        carts, setCarts
+    } = useCurrentApp();
+
+    const navigate = useNavigate();
+
     const handleLogout = async () => {
+        //todo
         const res = await logoutAPI();
         if (res.data) {
             setUser(null);
+            setCarts([]);
             setIsAuthenticated(false);
             localStorage.removeItem("access_token");
+            localStorage.removeItem("carts");
         }
     }
 
-    const items = [
+    let items = [
         {
             label: <label
                 style={{ cursor: 'pointer' }}
@@ -42,6 +59,7 @@ const AppHeader = () => {
             >Đăng xuất</label>,
             key: 'logout',
         },
+
     ];
     if (user?.role === 'ADMIN') {
         items.unshift({
@@ -91,15 +109,15 @@ const AppHeader = () => {
                         }}>☰</div>
                         <div className='page-header__logo'>
                             <span className='logo'>
-                                <span onClick={() => navigate('/')}> <FaReact className='rotate icon-react' />Beoo</span>
+                                <span onClick={() => navigate('/')}> <FaReact className='rotate icon-react' />Hỏi Dân !T</span>
 
                                 <VscSearchFuzzy className='icon-search' />
                             </span>
                             <input
                                 className="input-search" type={'text'}
                                 placeholder="Bạn tìm gì hôm nay"
-                                // value={props.searchTerm}
-                                // onChange={(e) => props.setSearchTerm(e.target.value)}
+                                value={props.searchTerm}
+                                onChange={(e) => props.setSearchTerm(e.target.value)}
                             />
                         </div>
 
@@ -107,21 +125,33 @@ const AppHeader = () => {
                     <nav className="page-header__bottom">
                         <ul id="navigation" className="navigation">
                             <li className="navigation__item">
-                                <Popover
-                                    className="popover-carts"
-                                    placement="topRight"
-                                    rootClassName="popover-carts"
-                                    title={"Sản phẩm mới thêm"}
-                                    content={contentPopover}
-                                    arrow={true}>
+                                {!isMobile
+                                    ?
+                                    <Popover
+                                        className="popover-carts"
+                                        placement="topRight"
+                                        rootClassName="popover-carts"
+                                        title={"Sản phẩm mới thêm"}
+                                        content={contentPopover}
+                                        arrow={true}>
+                                        <Badge
+                                            count={carts?.length ?? 0}
+                                            size={"small"}
+                                            showZero
+                                        >
+                                            <FiShoppingCart className='icon-cart' />
+                                        </Badge>
+                                    </Popover>
+                                    :
                                     <Badge
                                         count={carts?.length ?? 0}
                                         size={"small"}
                                         showZero
+                                        onClick={() => navigate("/order")}
                                     >
                                         <FiShoppingCart className='icon-cart' />
                                     </Badge>
-                                </Popover>
+                                }
                             </li>
                             <li className="navigation__item mobile"><Divider type='vertical' /></li>
                             <li className="navigation__item mobile">
@@ -152,8 +182,14 @@ const AppHeader = () => {
                 <p onClick={() => handleLogout()}>Đăng xuất</p>
                 <Divider />
             </Drawer>
+
+            <ManageAccount
+                isModalOpen={openManageAccount}
+                setIsModalOpen={setOpenManageAccount}
+            />
+
         </>
     )
-}
+};
 
-export default AppHeader
+export default AppHeader;

@@ -30,6 +30,7 @@ const BookDetail = (props: IProps) => {
     const refGallery = useRef<ImageGallery>(null);
     const [currentQuantity, setCurrentQuantity] = useState<number>(1);
     const { carts, setCarts } = useCurrentApp();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (currentBook) {
@@ -86,7 +87,7 @@ const BookDetail = (props: IProps) => {
         }
     }
 
-    const handleAddToCart = () => {
+    const handleAddToCart = (isBuyNow = false) => {
         //update localstorage
         const cartStorage = localStorage.getItem("carts");
         if (cartStorage && currentBook) {
@@ -113,11 +114,16 @@ const BookDetail = (props: IProps) => {
             //sync React Context
             setCarts(data);
         }
-        message.success("Thêm sản phẩm vào giỏ hàng thành công!");
+
+        if (isBuyNow) {
+            navigate("/order")
+        } else {
+            message.success("Thêm sản phẩm vào giỏ hàng thành công!");
+        }
     }
 
     console.log("carts", carts);
-    
+
 
     return (
         <div style={{ background: '#efefef', padding: "20px 0" }}>
@@ -194,6 +200,7 @@ const BookDetail = (props: IProps) => {
                                         <span>Thêm vào giỏ hàng</span>
                                     </button>
                                     <button
+                                        onClick={() => handleAddToCart(true)}
                                         className='now'>Mua ngay</button>
                                 </div>
                             </Col>
